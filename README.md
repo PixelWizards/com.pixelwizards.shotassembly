@@ -1,5 +1,7 @@
 # com.pixelwizards.shotassembly
 
+[![openupm](https://img.shields.io/npm/v/com.pixelwizards.shotassembly?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.pixelwizards.shotassembly/)
+
 ## About this Project
 
 Shot Assembly Wizard for procedurally generating Timeline sequences from a set of animations, 
@@ -17,6 +19,14 @@ You can find the Wizard via Window->Sequencing->Shot Assembly Wizard
 * optionally create the camera / cinemachine brain 
 
 ## Installation
+
+### Install via OpenUPM
+
+The package is available on the [openupm registry](https://openupm.com). It's recommended to install it via [openupm-cli](https://github.com/openupm/openupm-cli).
+
+```
+openupm add com.pixelwizards.shotassembly
+```
 
 ### Install via git URL
 
