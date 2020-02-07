@@ -7,7 +7,11 @@ and optionally to export the resulting scene as a .unitypackage
 
 You can find the Wizard via Window->Sequencing->Shot Assembly Wizard
 
+<<<<<<< HEAD
 ![Main Window](Documentation~/images/ShotAssemblyWindow.png)
+=======
+![Main Window](Documentation~/MainWindow.png)
+>>>>>>> e5bc2dc76ec9fcbb227d7f2628092ead482ae76a
 
 ## Future Tasks
 
