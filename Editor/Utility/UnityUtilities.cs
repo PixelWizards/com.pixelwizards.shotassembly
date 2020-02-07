@@ -100,11 +100,12 @@ namespace PixelWizards.ShotAssembly
         /// <param name="sceneName">name of the asset we want to export (used for the filename)</param>
         public static void ExportPackage(string scenePath, string sceneName)
         {
-            var path = EditorUtility.SaveFilePanel("Export Package", sceneName + ".unitypackage", "unitypackage", "Save the exported package.");
+            var savePath = EditorUtility.SaveFilePanel("Export Package", Application.dataPath, sceneName, "unitypackage");
 
-            if (path.Length != 0)
+            if (savePath.Length != 0)
             {
-                AssetDatabase.ExportPackage(path, scenePath + sceneName, ExportPackageOptions.IncludeDependencies);
+                var assetPath = "Assets/" + scenePath + "/" + sceneName + ".unity";
+                AssetDatabase.ExportPackage(assetPath, savePath, ExportPackageOptions.IncludeDependencies);
             }
         }
     }
