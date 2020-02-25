@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using Control = PixelWizards.ShotAssembly.ShotAssemblyController;
 using Loc = PixelWizards.ShotAssembly.ShotAssemblyLoc;                                 // string localization table
@@ -102,31 +103,48 @@ namespace PixelWizards.ShotAssembly
                 {
                     GUILayout.BeginVertical();
                     {
+                        Control.model.useExistingTimeline = EditorGUILayout.Toggle("Use Existing Timeline", Control.model.useExistingTimeline);
                         GUILayout.Space(5f);
-                        GUILayout.BeginHorizontal();
+
+                        if (Control.model.useExistingTimeline)
                         {
-                            var content = new GUIContent
+                            GUILayout.Label("Use Existing Timeline", EditorStyles.boldLabel);
+                            GUILayout.BeginHorizontal();
                             {
-                                text = "Timeline Name",
-                                tooltip = "Enter a name for the timeline you wish to create, or leave empty to auto-generate a name"
-                            };
-                            GUILayout.Label(content, GUILayout.Width(100f));
-                            Control.model.timelineName = GUILayout.TextField(Control.model.timelineName, GUILayout.ExpandWidth(true));
+                                GUILayout.Label("Select Timeline", GUILayout.Width(100f));
+                                Control.model.existingTimeline = EditorGUILayout.ObjectField(Control.model.existingTimeline, typeof(PlayableDirector), true, GUILayout.ExpandWidth(true)) as PlayableDirector;
+                            }
+                            GUILayout.EndHorizontal();
                         }
-                        GUILayout.EndHorizontal();
-                        GUILayout.Space(5f);
-                        GUILayout.BeginHorizontal();
+                        else
                         {
-                            var content = new GUIContent
+                            GUILayout.Label("Create New Timeline", EditorStyles.boldLabel);
+                            GUILayout.BeginHorizontal();
                             {
-                                text = "Timeline Path",
-                                tooltip = "Add a path to save the output Timeline asset"
-                            };
-                            GUILayout.Label(content, GUILayout.Width(100f));
-                            GUILayout.Label("Assets/", GUILayout.Width(45f));
-                            Control.model.timelinePath = GUILayout.TextField(Control.model.timelinePath, GUILayout.ExpandWidth(true));
+                                var content = new GUIContent
+                                {
+                                    text = "Timeline Name",
+                                    tooltip = "Enter a name for the timeline you wish to create, or leave empty to auto-generate a name"
+                                };
+                                GUILayout.Label(content, GUILayout.Width(100f));
+                                Control.model.timelineName = GUILayout.TextField(Control.model.timelineName, GUILayout.ExpandWidth(true));
+                            }
+                            GUILayout.EndHorizontal();
+
+                            GUILayout.Space(5f);
+                            GUILayout.BeginHorizontal();
+                            {
+                                var content = new GUIContent
+                                {
+                                    text = "Timeline Path",
+                                    tooltip = "Add a path to save the output Timeline asset"
+                                };
+                                GUILayout.Label(content, GUILayout.Width(100f));
+                                GUILayout.Label("Assets/", GUILayout.Width(45f));
+                                Control.model.timelinePath = GUILayout.TextField(Control.model.timelinePath, GUILayout.ExpandWidth(true));
+                            }
+                            GUILayout.EndHorizontal();
                         }
-                        GUILayout.EndHorizontal();
                         GUILayout.Space(5f);
                     }
                     GUILayout.EndVertical();
@@ -236,7 +254,6 @@ namespace PixelWizards.ShotAssembly
             }
             GUILayout.EndHorizontal();
         }
-
         private void DoProcessUI()
         {
             // process the files

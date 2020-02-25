@@ -5,6 +5,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.SceneManagement;
 using UnityEngine.Timeline;
 
 namespace PixelWizards.ShotAssembly
@@ -19,6 +20,8 @@ namespace PixelWizards.ShotAssembly
         public SceneAsset sceneRef;
         public string timelineName = "MasterTimeline";
         public string timelinePath = "Timeline";
+        public bool useExistingTimeline = false;
+        public PlayableDirector existingTimeline;
         public TimelineAsset timelineRef;
         public GameObject actorPrefab;
         public GameObject actorSceneInstance;
@@ -45,6 +48,11 @@ namespace PixelWizards.ShotAssembly
         /// </summary>
         public static void RefreshAnimationList()
         {
+            if( model.animationPath.Length == 0)
+            {
+                if (!EditorUtility.DisplayDialog("Animation Filter is Empty!", "The animation filter is empty, this will search your entire project (and may take a while), are you sure?", "Search", "Cancel"))
+                    return;
+            }
             model.animationList = GetAnimations();
         }
 
@@ -89,6 +97,13 @@ namespace PixelWizards.ShotAssembly
             {
                 validateLog.AppendLine("No animations in search query? Need to filter for animations first!");
             }
+            if( model.useExistingTimeline)
+            {
+                if( model.existingTimeline == null)
+                {
+                    validateLog.AppendLine("If you want to use an existing timeline, you need to select a playable director from the currently loaded scene");
+                }
+            }
 
             if( validateLog.Length > 0)
             {
@@ -107,12 +122,22 @@ namespace PixelWizards.ShotAssembly
             {
                 return;
             }
-            var scene = UnityUtilities.CreateNewScene(model.sceneName, model.scenePath);
-            var pd = UnityUtilities.CreatePlayableDirector(model.timelineName, model.timelinePath);
+            Scene scene;
+            PlayableDirector pd;
+            if( !model.useExistingTimeline)
+            {
+                scene = UnityUtilities.CreateNewScene(model.sceneName, model.scenePath);
+                pd = UnityUtilities.CreatePlayableDirector(model.timelineName, model.timelinePath);
+            }
+            else
+            {
+                scene = SceneManager.GetActiveScene();
+                pd = model.existingTimeline;
+            }
 
             InstanceActorInScene();
             GenerateBaseTimelineTracks(pd);
-            UnityUtilities.PromptToSaveScene(scene);
+           // UnityUtilities.PromptToSaveScene(scene);
 
             // set the scene selection to our new timeline so that we can scrub and see it
             Selection.activeObject = pd.gameObject;
@@ -150,29 +175,29 @@ namespace PixelWizards.ShotAssembly
                 UnityUtilities.AddClipToAnimationTrack(animTrack, clip);
             }
 
-            var mainCam = GameObject.FindObjectOfType<Camera>();
-            var brain = mainCam.gameObject.AddComponent<CinemachineBrain>();
+            //var mainCam = GameObject.FindObjectOfType<Camera>();
+            //var brain = mainCam.gameObject.AddComponent<CinemachineBrain>();
 
-            var go = new GameObject();
-            go.name = "LookDev VCam";
-            var vcam = go.AddComponent<CinemachineVirtualCamera>();
-            vcam.m_Follow = model.actorSceneInstance.transform;
-            vcam.m_LookAt = model.actorSceneInstance.transform;
-            // set the Body & Aim for the vcam
-            var vcamAim = vcam.AddCinemachineComponent<CinemachineComposer>();
-            var vcamBody = vcam.AddCinemachineComponent<CinemachineFramingTransposer>();
+            //var go = new GameObject();
+            //go.name = "LookDev VCam";
+            //var vcam = go.AddComponent<CinemachineVirtualCamera>();
+            //vcam.m_Follow = model.actorSceneInstance.transform;
+            //vcam.m_LookAt = model.actorSceneInstance.transform;
+            //// set the Body & Aim for the vcam
+            //var vcamAim = vcam.AddCinemachineComponent<CinemachineComposer>();
+            //var vcamBody = vcam.AddCinemachineComponent<CinemachineFramingTransposer>();
 
-            // and add a cinemachine track so we can see what we're animating
-            var cmTrack = timelineAsset.CreateTrack<CinemachineTrack>(null,  "Brain");
+            //// and add a cinemachine track so we can see what we're animating
+            //var cmTrack = timelineAsset.CreateTrack<CinemachineTrack>(null,  "Brain");
 
-            pd.SetGenericBinding(cmTrack, brain);
+            //pd.SetGenericBinding(cmTrack, brain);
             
-            var cmClip = cmTrack.CreateDefaultClip();
-            cmClip.duration = pd.duration;
-            cmClip.displayName = go.name;
-            var cmAsset = cmClip.asset as CinemachineShot;
-            cmAsset.VirtualCamera.exposedName = "LookdevVCam";
-            pd.SetReferenceValue("LookdevVCam", vcam);
+            //var cmClip = cmTrack.CreateDefaultClip();
+            //cmClip.duration = pd.duration;
+            //cmClip.displayName = go.name;
+            //var cmAsset = cmClip.asset as CinemachineShot;
+            //cmAsset.VirtualCamera.exposedName = "LookdevVCam";
+            //pd.SetReferenceValue("LookdevVCam", vcam);
         }
 
         /// <summary>
