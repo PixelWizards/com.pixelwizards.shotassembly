@@ -107,7 +107,8 @@ namespace PixelWizards.ShotAssembly
 
             if( validateLog.Length > 0)
             {
-                Debug.Log(validateLog.ToString());
+               // Debug.Log(validateLog.ToString());
+                EditorUtility.DisplayDialog("Error", validateLog.ToString(), "Ok");
                 return false;
             }
             return true;
@@ -137,7 +138,6 @@ namespace PixelWizards.ShotAssembly
 
             InstanceActorInScene();
             GenerateBaseTimelineTracks(pd);
-           // UnityUtilities.PromptToSaveScene(scene);
 
             // set the scene selection to our new timeline so that we can scrub and see it
             Selection.activeObject = pd.gameObject;
@@ -205,6 +205,9 @@ namespace PixelWizards.ShotAssembly
         /// </summary>
         public static void Export()
         {
+            // save the scene first
+            UnityUtilities.PromptToSaveScene(SceneManager.GetActiveScene());
+
             UnityUtilities.ExportPackage(model.scenePath, model.sceneName);
         }
     }
