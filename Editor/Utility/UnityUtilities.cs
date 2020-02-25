@@ -9,16 +9,32 @@ namespace PixelWizards.ShotAssembly
 {
     public class UnityUtilities
     {
-        // generate this type of Timeline Track
-        public static Scene CreateNewScene( string sceneName, string scenePath)
+        /// <summary>
+        /// Create a new scene, and optionally save it at the given path
+        /// </summary>
+        /// <param name="sceneName">name of the new scene</param>
+        /// <param name="scenePath">path we want to save it to</param>
+        /// <param name="autoSave">whether we want to automatically save it upon creation</param>
+        /// <returns></returns>
+        public static Scene CreateNewScene( string sceneName, string scenePath, bool autoSave = false)
         {
             var newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects);
             newScene.name = sceneName;
-            //EditorSceneManager.SaveScene(newScene, "Assets/" + scenePath + "/" + sceneName + ".unity");
+
+            if( autoSave)
+            {
+                EditorSceneManager.SaveScene(newScene, "Assets/" + scenePath + "/" + sceneName + ".unity");
+            }
 
             return newScene;
         }
 
+        /// <summary>
+        /// Create a new Playable director in the current scene. Automatically creates the timeline asset and saves it to the given folder
+        /// </summary>
+        /// <param name="timelineName">name of the playable director and timeline asset</param>
+        /// <param name="timelinePath">folder to save the timeline asset itself</param>
+        /// <returns></returns>
         public static PlayableDirector CreatePlayableDirector(string timelineName, string timelinePath)
         {
             // create the gameobject
@@ -37,6 +53,11 @@ namespace PixelWizards.ShotAssembly
             return pd;
         }
 
+        /// <summary>
+        /// Adds a given animation clip to the specified timeline track
+        /// </summary>
+        /// <param name="track">the timeline track to add the clip to</param>
+        /// <param name="clip">the animation clip to add</param>
         public static void AddClipToAnimationTrack(TrackAsset track, AnimationClip clip)
         {
             var newClip = track.CreateDefaultClip();
@@ -49,8 +70,8 @@ namespace PixelWizards.ShotAssembly
         /// <summary>
         /// create the timeline asset at the given path
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="path"></param>
+        /// <param name="name">the name of the timeline asset to create</param>
+        /// <param name="path">the path to save the asset into</param>
         /// <returns></returns>
         public static TimelineAsset CreateTimelineAsset(string name, string path)
         {
@@ -63,7 +84,7 @@ namespace PixelWizards.ShotAssembly
         }
 
         /// <summary>
-        /// assign a timeline asset to a given gameobject (MUST have playable director)
+        /// assign a timeline asset to a given gameobject, will create a playable director on the gameobject if it doesn't already have one
         /// </summary>
         /// <param name="go"></param>
         /// <param name="ta"></param>
@@ -72,8 +93,7 @@ namespace PixelWizards.ShotAssembly
             var dir = go.GetComponent<PlayableDirector>();
             if( dir == null)
             {
-                Debug.LogError("GameObject : " + go.name + " does not have a playable director component?");
-                return;
+                dir = go.AddComponent<PlayableDirector>();
             }
             dir.playableAsset = ta;
         }
@@ -82,7 +102,7 @@ namespace PixelWizards.ShotAssembly
         /// <summary>
         /// Prompt the user to save the new scene
         /// </summary>
-        /// <param name="thisScene"></param>
+        /// <param name="thisScene">the scene we want to save</param>
         public static void PromptToSaveScene(Scene thisScene)
         {
             var path = EditorUtility.SaveFilePanelInProject("Save Scene",  thisScene.name + ".unity", "unity", "Please save the new scene.");
