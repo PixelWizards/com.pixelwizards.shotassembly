@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 using UnityEngine.Timeline;
+using Loc = PixelWizards.ShotAssembly.ShotAssemblyLoc;                                 // string localization table
 
 namespace PixelWizards.ShotAssembly
 {
@@ -50,7 +51,7 @@ namespace PixelWizards.ShotAssembly
         {
             if( model.animationPath.Length == 0)
             {
-                if (!EditorUtility.DisplayDialog("Animation Filter is Empty!", "The animation filter is empty, this will search your entire project (and may take a while), are you sure?", "Search", "Cancel"))
+                if (!EditorUtility.DisplayDialog(Loc.WARNING_ANIMFILTEREMPTY_TITLE, Loc.WARNING_ANIMFILTEREMPTY_MSG, Loc.BUTTON_SEARCH, Loc.BUTTON_CANCEL))
                     return;
             }
             model.animationList = GetAnimations();
@@ -91,24 +92,24 @@ namespace PixelWizards.ShotAssembly
 
             if( model.actorPrefab == null)
             {
-                validateLog.AppendLine("Need to specify an Actor (Skinned Mesh Renderer) to assign the animations to!");
+                validateLog.AppendLine(Loc.ERROR_NOPREFAB);
             }
             if (model.animationList.Count < 1)
             {
-                validateLog.AppendLine("No animations in search query? Need to filter for animations first!");
+                validateLog.AppendLine(Loc.ERROR_NOANIM);
             }
             if( model.useExistingTimeline)
             {
                 if( model.existingTimeline == null)
                 {
-                    validateLog.AppendLine("If you want to use an existing timeline, you need to select a playable director from the currently loaded scene");
+                    validateLog.AppendLine(Loc.ERROR_NOTIMELINE);
                 }
             }
 
             if( validateLog.Length > 0)
             {
                // Debug.Log(validateLog.ToString());
-                EditorUtility.DisplayDialog("Error", validateLog.ToString(), "Ok");
+                EditorUtility.DisplayDialog(Loc.ERROR_TITLE, validateLog.ToString(), Loc.BUTTON_OK);
                 return false;
             }
             return true;

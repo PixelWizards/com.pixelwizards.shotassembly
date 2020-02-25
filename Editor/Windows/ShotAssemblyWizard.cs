@@ -18,6 +18,37 @@ namespace PixelWizards.ShotAssembly
         public const string WINDOWTITLE = "Shot Assembly Wizard";
         public const string WINDOW_HEADER = "Shot Assembly";
         public const string HELP_HEADER = "This wizard is designed to help you easily assemble a sequence of animation clips for review";
+        public const string ERROR_NOPREFAB = "Need to specify an Actor (Skinned Mesh Renderer) to assign the animations to!";
+        public const string ERROR_NOANIM = "No animations in search query? Need to filter for animations first!";
+        public const string ERROR_NOTIMELINE = "If you want to use an existing timeline, you need to select a playable director from the currently loaded scene";
+        public const string ERROR_TITLE = "Error";
+        public const string BUTTON_OK = "Ok";
+        public const string BUTTON_SEARCH = "Search";
+        public const string BUTTON_CANCEL = "Cancel";
+        public const string WARNING_ANIMFILTEREMPTY_TITLE = "Animation Filter is Empty!";
+        public const string WARNING_ANIMFILTEREMPTY_MSG = "The animation filter is empty, this will search your entire project (and may take a while), are you sure?";
+        public const string FOLDOUT_TIMELINE = "Timeline";
+        public const string FOLDOUT_ACTOR = "Actors";
+        public const string FOLDOUT_ANIM = "Animations";
+        public const string TOGGLE_EXISTINGTIMELINE = "Use Existing Timeline";
+        public const string LABEL_USEEXISTING = "Use Existing Timeline";
+        public const string LABEL_SELECTTIMELINE = "Select Timeline";
+        public const string TOOLTIP_SELECTTIMELINE = "Choose a GameObject with a Playable Director in the currently loaded scene";
+        public const string LABEL_CREATETIMELINE = "Create New Timeline";
+        public const string LABEL_TIMELINENAME = "Timeline Name";
+        public const string TOOLTIP_TIMELINENAME = "Enter a name for the timeline you wish to create, or leave empty to auto-generate a name";
+        public const string LABEL_TIMELINEPATH = "Timeline Path";
+        public const string TOOLTIP_TIMELINEPATH = "Add a path to save the output Timeline asset";
+        public const string LABEL_ACTORPREFAB = "Actor Prefab";
+        public const string TOOLTIP_ACTORPREFAB = "Add a reference to the Actor prefab to be used";
+        public const string LABEL_ANIMBASEPATH = "Anim Base Path:";
+        public const string TOOLTIP_ANIMBASEPATH = "Enter a path to the animations you wish to load";
+        public const string LABEL_ANIMFILTER = "Filter";
+        public const string TOOLTIP_ANIMFILTER = "Enter a search filter for the animation names to search.";
+
+        public const string BUTTON_STEP1 = "Step 1: Search Anims";
+        public const string BUTTON_STEP2 = "Step 2: Assemble Sequence";
+        public const string BUTTON_STEP3 = "Step 3: Export .unitypackage";
 
     }
 
@@ -69,19 +100,19 @@ namespace PixelWizards.ShotAssembly
 
                 GUILayout.Space(10f);
 
-                state.timelinestate = EditorGUILayout.Foldout(state.timelinestate, "Timeline");
+                state.timelinestate = EditorGUILayout.Foldout(state.timelinestate, Loc.FOLDOUT_TIMELINE);
                 if( state.timelinestate)
                 {
                     DoTimelineUI();
                     GUILayout.Space(10f);
                 }
-                state.actorState = EditorGUILayout.Foldout(state.actorState, "Actors");
+                state.actorState = EditorGUILayout.Foldout(state.actorState, Loc.FOLDOUT_ACTOR);
                 if (state.actorState)
                 {
                     DoActorUI();
                     GUILayout.Space(10f);
                 }
-                state.animState = EditorGUILayout.Foldout(state.animState, "Animations");
+                state.animState = EditorGUILayout.Foldout(state.animState, Loc.FOLDOUT_ANIM);
                 if (state.animState)
                 {
                     DoAnimUI();
@@ -103,28 +134,33 @@ namespace PixelWizards.ShotAssembly
                 {
                     GUILayout.BeginVertical();
                     {
-                        Control.model.useExistingTimeline = EditorGUILayout.Toggle("Use Existing Timeline", Control.model.useExistingTimeline);
+                        Control.model.useExistingTimeline = EditorGUILayout.Toggle(Loc.TOGGLE_EXISTINGTIMELINE, Control.model.useExistingTimeline);
                         GUILayout.Space(5f);
 
                         if (Control.model.useExistingTimeline)
                         {
-                            GUILayout.Label("Use Existing Timeline", EditorStyles.boldLabel);
+                            GUILayout.Label(Loc.LABEL_USEEXISTING, EditorStyles.boldLabel);
                             GUILayout.BeginHorizontal();
                             {
-                                GUILayout.Label("Select Timeline", GUILayout.Width(100f));
+                                var content = new GUIContent
+                                {
+                                    text = Loc.LABEL_SELECTTIMELINE,
+                                    tooltip = Loc.TOOLTIP_SELECTTIMELINE
+                                };
+                                GUILayout.Label(content, GUILayout.Width(100f));
                                 Control.model.existingTimeline = EditorGUILayout.ObjectField(Control.model.existingTimeline, typeof(PlayableDirector), true, GUILayout.ExpandWidth(true)) as PlayableDirector;
                             }
                             GUILayout.EndHorizontal();
                         }
                         else
                         {
-                            GUILayout.Label("Create New Timeline", EditorStyles.boldLabel);
+                            GUILayout.Label(Loc.LABEL_CREATETIMELINE, EditorStyles.boldLabel);
                             GUILayout.BeginHorizontal();
                             {
                                 var content = new GUIContent
                                 {
-                                    text = "Timeline Name",
-                                    tooltip = "Enter a name for the timeline you wish to create, or leave empty to auto-generate a name"
+                                    text = Loc.LABEL_TIMELINENAME,
+                                    tooltip = Loc.TOOLTIP_TIMELINENAME
                                 };
                                 GUILayout.Label(content, GUILayout.Width(100f));
                                 Control.model.timelineName = GUILayout.TextField(Control.model.timelineName, GUILayout.ExpandWidth(true));
@@ -136,8 +172,8 @@ namespace PixelWizards.ShotAssembly
                             {
                                 var content = new GUIContent
                                 {
-                                    text = "Timeline Path",
-                                    tooltip = "Add a path to save the output Timeline asset"
+                                    text = Loc.LABEL_TIMELINEPATH,
+                                    tooltip = Loc.TOOLTIP_TIMELINEPATH
                                 };
                                 GUILayout.Label(content, GUILayout.Width(100f));
                                 GUILayout.Label("Assets/", GUILayout.Width(45f));
@@ -171,8 +207,8 @@ namespace PixelWizards.ShotAssembly
                         {
                             var content = new GUIContent
                             {
-                                text = "Actor Prefab",
-                                tooltip = "Add a reference to the Actor prefab to be used"
+                                text = Loc.LABEL_ACTORPREFAB,
+                                tooltip = Loc.TOOLTIP_ACTORPREFAB
                             };
                             GUILayout.Label(content, GUILayout.Width(100f));
                             Control.model.actorPrefab = EditorGUILayout.ObjectField(Control.model.actorPrefab, typeof(GameObject), false, GUILayout.ExpandWidth(true)) as GameObject;
@@ -204,8 +240,8 @@ namespace PixelWizards.ShotAssembly
                         {
                             var content = new GUIContent
                             {
-                                text = "Anim Base Path:",
-                                tooltip = "Enter a path to the animations you wish to load"
+                                text = Loc.LABEL_ANIMBASEPATH,
+                                tooltip = Loc.TOOLTIP_ANIMBASEPATH
                             };
                             GUILayout.Label(content, GUILayout.Width(100f));
                             GUILayout.Label("Assets/", GUILayout.Width(45f));
@@ -217,8 +253,8 @@ namespace PixelWizards.ShotAssembly
                         {
                             var content = new GUIContent
                             {
-                                text = "Filter",
-                                tooltip = "Enter a search filter for the animation names to search."
+                                text = Loc.LABEL_ANIMFILTER,
+                                tooltip = Loc.TOOLTIP_ANIMFILTER
                             };
                             GUILayout.Label(content, GUILayout.Width(100f));
                             Control.model.animFilter = GUILayout.TextField(Control.model.animFilter, GUILayout.ExpandWidth(true));
@@ -260,17 +296,17 @@ namespace PixelWizards.ShotAssembly
             GUILayout.BeginVertical(GUILayout.MinWidth(350f));
             {
                 GUILayout.Space(10f);
-                if (GUILayout.Button("Step 1: Search Anims", GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
+                if (GUILayout.Button(Loc.BUTTON_STEP1, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
                 {
                     Control.RefreshAnimationList();
                 }
                 GUILayout.Space(5f);
-                if (GUILayout.Button("Step 2: Assemble Sequence", GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
+                if (GUILayout.Button(Loc.BUTTON_STEP2, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
                 {
                     Control.Process();
                 }
                 GUILayout.Space(5f);
-                if (GUILayout.Button("Step 3: Export .unitypackage", GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
+                if (GUILayout.Button(Loc.BUTTON_STEP3, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
                 {
                     Control.Export();
                 }
