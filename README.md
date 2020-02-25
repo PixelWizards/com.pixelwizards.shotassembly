@@ -7,6 +7,8 @@
 Shot Assembly Wizard for procedurally generating Timeline sequences from a set of animations, 
 and optionally to export the resulting scene as a .unitypackage
 
+Can use an existing Timeline in a scene or optionally generate a new one.
+
 You can find the Wizard via Window->Sequencing->Shot Assembly Wizard
 
 ![Main Window](Documentation~/images/ShotAssemblyWindow.png)
@@ -14,8 +16,6 @@ You can find the Wizard via Window->Sequencing->Shot Assembly Wizard
 ## Future Tasks
 
 * API to allow for pipeline integration / CLI operation
-* optionally use an existing open scene 
-* optionally use an existing Playable Director / Timeline sequence to generate the animation tracks
 * optionally create the camera / cinemachine brain 
 
 ## Installation
