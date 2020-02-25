@@ -47,8 +47,11 @@ namespace PixelWizards.ShotAssembly
         public const string TOOLTIP_ANIMFILTER = "Enter a search filter for the animation names to search.";
 
         public const string BUTTON_STEP1 = "Step 1: Search Anims";
+        public const string TOOLTIP_BUTTONSTEP1 = "Enter a search path and/or filter for animations then run the search query.";
         public const string BUTTON_STEP2 = "Step 2: Assemble Sequence";
+        public const string TOOLTIP_BUTTONSTEP2 = "Generates the timeline sequence, instances the actor prefab and applies all of the filtered animations to the selected actor";
         public const string BUTTON_STEP3 = "Step 3: Export .unitypackage";
+        public const string TOOLTIP_BUTTONSTEP3 = "Optionally exports the resulting scene as a .unitypackage as part of an animreview / pipeline publish step";
 
     }
 
@@ -296,17 +299,34 @@ namespace PixelWizards.ShotAssembly
             GUILayout.BeginVertical(GUILayout.MinWidth(350f));
             {
                 GUILayout.Space(10f);
-                if (GUILayout.Button(Loc.BUTTON_STEP1, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
+                var content = new GUIContent
+                {
+                    text = Loc.BUTTON_STEP1,
+                    tooltip = Loc.TOOLTIP_BUTTONSTEP1
+                };
+                if (GUILayout.Button(content, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
                 {
                     Control.RefreshAnimationList();
                 }
                 GUILayout.Space(5f);
-                if (GUILayout.Button(Loc.BUTTON_STEP2, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
+
+                content = new GUIContent
+                {
+                    text = Loc.BUTTON_STEP2,
+                    tooltip = Loc.TOOLTIP_BUTTONSTEP2
+                };
+                if (GUILayout.Button(content, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
                 {
                     Control.Process();
                 }
                 GUILayout.Space(5f);
-                if (GUILayout.Button(Loc.BUTTON_STEP3, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
+
+                content = new GUIContent
+                {
+                    text = Loc.BUTTON_STEP3,
+                    tooltip = Loc.TOOLTIP_BUTTONSTEP3
+                };
+                if (GUILayout.Button(content, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
                 {
                     Control.Export();
                 }

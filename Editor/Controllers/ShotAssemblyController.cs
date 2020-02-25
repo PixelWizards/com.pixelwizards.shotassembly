@@ -124,16 +124,15 @@ namespace PixelWizards.ShotAssembly
             {
                 return;
             }
-            Scene scene;
             PlayableDirector pd;
             if( !model.useExistingTimeline)
             {
-                scene = UnityUtilities.CreateNewScene(model.sceneName, model.scenePath);
+                UnityUtilities.CreateNewScene(model.sceneName, model.scenePath);
                 pd = UnityUtilities.CreatePlayableDirector(model.timelineName, model.timelinePath);
             }
             else
             {
-                scene = SceneManager.GetActiveScene();
+                SceneManager.GetActiveScene();
                 pd = model.existingTimeline;
             }
 
