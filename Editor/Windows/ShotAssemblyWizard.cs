@@ -27,10 +27,13 @@ namespace PixelWizards.ShotAssembly
         public const string BUTTON_CANCEL = "Cancel";
         public const string WARNING_ANIMFILTEREMPTY_TITLE = "Animation Filter is Empty!";
         public const string WARNING_ANIMFILTEREMPTY_MSG = "The animation filter is empty, this will search your entire project (and may take a while), are you sure?";
-        public const string FOLDOUT_TIMELINE = "Timeline";
+        public const string FOLDOUT_TIMELINE = "Timeline & Scene";
         public const string FOLDOUT_ACTOR = "Actors";
         public const string FOLDOUT_ANIM = "Animations";
+        public const string TOGGLE_CREATENEWSCENE = "Create a new Scene";
+        public const string TOOLTIP_CREATENEWSCENE = "Create a new empty scene instead of adding the timeline to the existing scene";
         public const string TOGGLE_EXISTINGTIMELINE = "Use Existing Timeline";
+        public const string TOOLTIP_EXISTINGTIMELINE = "Use an existing playable director in the open scene instead of creating a new one";
         public const string LABEL_USEEXISTING = "Use Existing Timeline";
         public const string LABEL_SELECTTIMELINE = "Select Timeline";
         public const string TOOLTIP_SELECTTIMELINE = "Choose a GameObject with a Playable Director in the currently loaded scene";
@@ -45,7 +48,8 @@ namespace PixelWizards.ShotAssembly
         public const string TOOLTIP_ANIMBASEPATH = "Enter a path to the animations you wish to load";
         public const string LABEL_ANIMFILTER = "Filter";
         public const string TOOLTIP_ANIMFILTER = "Enter a search filter for the animation names to search.";
-
+        public const string LABEL_ANIMTRACKSETTING = "One Anim per Track";
+        public const string TOOLTIP_ANIMTRACKSETTING = "Instead of adding all animations to one track for the character, instead create multiple instances and add one animation per track (for example, crowd anims)";
         public const string BUTTON_STEP1 = "Step 1: Search Anims";
         public const string TOOLTIP_BUTTONSTEP1 = "Enter a search path and/or filter for animations then run the search query.";
         public const string BUTTON_STEP2 = "Step 2: Assemble Sequence";
@@ -60,12 +64,15 @@ namespace PixelWizards.ShotAssembly
     /// </summary>
     public class ShotAssemblyWizard : EditorWindow
     {
+        /// <summary>
+        /// the foldout toggle states - open them by default
+        /// </summary>
         private class WizardState
         {
-            public bool sceneState = false;
-            public bool timelinestate = false;
-            public bool actorState = false;
-            public bool animState = false;
+            public bool sceneState = true;
+            public bool timelinestate = true;
+            public bool actorState = true;
+            public bool animState = true;
         }
 
         private static WizardState state = new WizardState();
@@ -126,6 +133,9 @@ namespace PixelWizards.ShotAssembly
           //  GUILayout.EndVertical();
         }
         
+        /// <summary>
+        /// Renders the Timeline section of the UI
+        /// </summary>
         private void DoTimelineUI()
         {
             // <TimelineSettings>
@@ -137,7 +147,15 @@ namespace PixelWizards.ShotAssembly
                 {
                     GUILayout.BeginVertical();
                     {
-                        Control.model.useExistingTimeline = EditorGUILayout.Toggle(Loc.TOGGLE_EXISTINGTIMELINE, Control.model.useExistingTimeline);
+                        {
+                            var content = new GUIContent
+                            {
+                                text = Loc.TOGGLE_EXISTINGTIMELINE,
+                                tooltip = Loc.TOOLTIP_EXISTINGTIMELINE
+                            };
+                            Control.model.useExistingTimeline = EditorGUILayout.Toggle(content, Control.model.useExistingTimeline);
+                        }
+                        
                         GUILayout.Space(5f);
 
                         if (Control.model.useExistingTimeline)
@@ -169,8 +187,8 @@ namespace PixelWizards.ShotAssembly
                                 Control.model.timelineName = GUILayout.TextField(Control.model.timelineName, GUILayout.ExpandWidth(true));
                             }
                             GUILayout.EndHorizontal();
-
                             GUILayout.Space(5f);
+
                             GUILayout.BeginHorizontal();
                             {
                                 var content = new GUIContent
@@ -181,6 +199,19 @@ namespace PixelWizards.ShotAssembly
                                 GUILayout.Label(content, GUILayout.Width(100f));
                                 GUILayout.Label("Assets/", GUILayout.Width(45f));
                                 Control.model.timelinePath = GUILayout.TextField(Control.model.timelinePath, GUILayout.ExpandWidth(true));
+                            }
+                            GUILayout.EndHorizontal();
+
+                            GUILayout.Space(5f);
+
+                            GUILayout.BeginHorizontal();
+                            {
+                                var content = new GUIContent
+                                {
+                                    text = Loc.TOGGLE_CREATENEWSCENE,
+                                    tooltip = Loc.TOOLTIP_CREATENEWSCENE
+                                };
+                                Control.model.createNewScene = EditorGUILayout.Toggle(content, Control.model.createNewScene);
                             }
                             GUILayout.EndHorizontal();
                         }
@@ -194,6 +225,10 @@ namespace PixelWizards.ShotAssembly
             GUILayout.EndHorizontal();
             // </TimelineSettings>
         }
+
+        /// <summary>
+        /// Renders the Actor / Prefab selection UI
+        /// </summary>
         private void DoActorUI()
         {
             // <ActorSettings>
@@ -227,6 +262,10 @@ namespace PixelWizards.ShotAssembly
             GUILayout.EndHorizontal();
             // </ActorSettings>
         }
+
+        /// <summary>
+        /// Renders the Animation filter / path section of the UI
+        /// </summary>
         private void DoAnimUI()
         {
             // <AnimationSettings>
@@ -264,6 +303,18 @@ namespace PixelWizards.ShotAssembly
                         }
                         GUILayout.EndHorizontal();
                         GUILayout.Space(5f);
+                        GUILayout.BeginHorizontal();
+                        {
+                            var content = new GUIContent
+                            {
+                                text = Loc.LABEL_ANIMTRACKSETTING,
+                                tooltip = Loc.TOOLTIP_ANIMTRACKSETTING
+                            };
+                            Control.model.oneTrackPerAnim = EditorGUILayout.Toggle(content, Control.model.oneTrackPerAnim);
+                            GUILayout.Space(5f);
+                        }
+                        GUILayout.EndHorizontal();
+                        GUILayout.Space(5f);
                     }
                     GUILayout.EndVertical();
                     GUILayout.Space(5f);
@@ -293,6 +344,10 @@ namespace PixelWizards.ShotAssembly
             }
             GUILayout.EndHorizontal();
         }
+
+        /// <summary>
+        /// Renders the bottom action step buttons
+        /// </summary>
         private void DoProcessUI()
         {
             // process the files

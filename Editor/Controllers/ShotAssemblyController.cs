@@ -19,13 +19,14 @@ namespace PixelWizards.ShotAssembly
         public string sceneName = "AnimReview";
         public string scenePath = "Scenes";
         public SceneAsset sceneRef;
+        public bool createNewScene = false;
         public string timelineName = "MasterTimeline";
         public string timelinePath = "Timeline";
         public bool useExistingTimeline = false;
         public PlayableDirector existingTimeline;
         public TimelineAsset timelineRef;
         public GameObject actorPrefab;
-        public GameObject actorSceneInstance;
+        public bool oneTrackPerAnim = false;            // if we want to instance the character tracks vertically instead of horizontally (one track per anim instead of all anims on one track)
         public string animationPath = "";
         public string animFilter;
 
@@ -125,18 +126,21 @@ namespace PixelWizards.ShotAssembly
                 return;
             }
             PlayableDirector pd;
+            // chcek if we're using an existing timeline or creating a new one
             if( !model.useExistingTimeline)
             {
-                UnityUtilities.CreateNewScene(model.sceneName, model.scenePath);
+                // do we need to make a new scene too?
+                if( model.createNewScene)
+                {
+                    UnityUtilities.CreateNewScene(model.sceneName, model.scenePath);
+                }
                 pd = UnityUtilities.CreatePlayableDirector(model.timelineName, model.timelinePath);
             }
             else
             {
-                SceneManager.GetActiveScene();
                 pd = model.existingTimeline;
             }
 
-            InstanceActorInScene();
             GenerateBaseTimelineTracks(pd);
 
             // set the scene selection to our new timeline so that we can scrub and see it
@@ -146,14 +150,12 @@ namespace PixelWizards.ShotAssembly
         /// <summary>
         /// Load the specified actor into the scene
         /// </summary>
-        private static void InstanceActorInScene()
+        private static GameObject InstanceActorInScene()
         {
             if (model.actorPrefab == null)
-                return;
+                return null;
 
-            var go = GameObject.Instantiate(model.actorPrefab);
-            if (go != null)
-                model.actorSceneInstance = go;
+            return Object.Instantiate(model.actorPrefab);
         }
 
         /// <summary>
@@ -164,17 +166,37 @@ namespace PixelWizards.ShotAssembly
         {
             var timelineAsset = pd.playableAsset as TimelineAsset;
 
-            var animTrack = timelineAsset.CreateTrack<AnimationTrack>(null, "Character Rig");
-
-            // bind the track to our new actor instance
-            pd.SetGenericBinding(animTrack, model.actorSceneInstance);
-
-            // add the clips to Timeline
-            foreach (var clip in model.animationList)
+            if( model.oneTrackPerAnim)
             {
-                UnityUtilities.AddClipToAnimationTrack(animTrack, clip);
-            }
+                // for each animation in the list, we want to instance an actor, create a track and bind the clip 
+                foreach (var clip in model.animationList)
+                {
+                    var go = InstanceActorInScene();
 
+                    var animTrack = timelineAsset.CreateTrack<AnimationTrack>(null, go.name );
+
+                    // bind the track to our new actor instance
+                    pd.SetGenericBinding(animTrack, go);
+
+                    UnityUtilities.AddClipToAnimationTrack(animTrack, clip);
+                }
+            }
+            else
+            {
+                var animTrack = timelineAsset.CreateTrack<AnimationTrack>(null, "Character Rig");
+
+                // bind the track to our new actor instance
+                var go = InstanceActorInScene();
+                pd.SetGenericBinding(animTrack, go);
+
+                // add the clips to Timeline
+                foreach (var clip in model.animationList)
+                {
+                    UnityUtilities.AddClipToAnimationTrack(animTrack, clip);
+                }
+            }
+            
+            // add cinemachine stuff
             //var mainCam = GameObject.FindObjectOfType<Camera>();
             //var brain = mainCam.gameObject.AddComponent<CinemachineBrain>();
 
