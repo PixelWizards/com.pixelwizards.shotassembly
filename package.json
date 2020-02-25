@@ -1,7 +1,7 @@
 {
   "name": "com.pixelwizards.shotassembly",
   "displayName": "PixelWizards - Shot Assembly",
-  "version": "0.1.0-preview.3",
+  "version": "0.1.0-preview.4",
   "unity": "2018.4",
   "description": "Shot Assembly Tool for procedurally generating Timeline sequences from a set of animations",
   "author": {

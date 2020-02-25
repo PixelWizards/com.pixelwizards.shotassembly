@@ -7,7 +7,11 @@
 Shot Assembly Wizard for procedurally generating Timeline sequences from a set of animations, 
 and optionally to export the resulting scene as a .unitypackage
 
-Can use an existing Timeline in a scene or optionally generate a new one.
+Can use an existing Timeline in a scene or optionally generate a new one. 
+
+Can optionally generate a new scene (or use the currently loaded one).
+
+Can optionally generate a unique track per animation (for crowd animation population)
 
 You can find the Wizard via Window->Sequencing->Shot Assembly Wizard
 
