@@ -30,7 +30,7 @@ namespace PixelWizards.ShotAssembly
         }
 
         /// <summary>
-        /// Create a new Playable director in the current scene. Automatically creates the timeline asset and saves it to the given folder
+        /// Create a new GameObject with a Playable director in the current scene. Automatically creates the timeline asset and saves it to the given folder
         /// </summary>
         /// <param name="timelineName">name of the playable director and timeline asset</param>
         /// <param name="timelinePath">folder to save the timeline asset itself</param>

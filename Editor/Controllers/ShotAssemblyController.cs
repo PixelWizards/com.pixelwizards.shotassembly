@@ -8,6 +8,7 @@ using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 using UnityEngine.Timeline;
 using Loc = PixelWizards.ShotAssembly.ShotAssemblyLoc;                                 // string localization table
+using API = PixelWizards.ShotAssembly.ShotAssemblyAPI;
 
 namespace PixelWizards.ShotAssembly
 {
@@ -43,6 +44,15 @@ namespace PixelWizards.ShotAssembly
         public static void Init()
         {
             model = new ShotAssemblyModel();
+        }
+
+        /// <summary>
+        /// Test method, generate shot
+        /// </summary>
+        [MenuItem("Assets/GenerateShot")]
+        public static void GenerateShot()
+        {
+            API.GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0010.json", false, "Timelines");
         }
 
         /// <summary>
