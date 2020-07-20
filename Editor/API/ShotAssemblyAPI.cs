@@ -14,6 +14,23 @@ namespace PixelWizards.ShotAssembly
     /// </summary>
     public static class ShotAssemblyAPI
     {
+
+        /// <summary>
+        /// Test method, generate shot
+        /// </summary>
+        [MenuItem("Assets/GenerateShot")]
+        public static void GenerateShot()
+        {
+            // create the scene with the first one
+            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0010.json", false, "Timelines", false, "ADAM-Ep2-Desert", "Scenes");
+            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0020.json", false, "Timelines");
+            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0030.json", false, "Timelines");
+            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0040.json", false, "Timelines");
+            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0050.json", false, "Timelines");
+            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0060.json", false, "Timelines");
+            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0070.json", false, "Timelines");
+        }
+
         /// <summary>
         /// Generate a shot, optionally create a new scene and timeline. Note: if you create a new scene, you MUST create a new timeline as well
         /// </summary>
