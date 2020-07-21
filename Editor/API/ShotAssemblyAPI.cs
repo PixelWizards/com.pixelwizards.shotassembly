@@ -14,41 +14,24 @@ namespace PixelWizards.ShotAssembly
     /// </summary>
     public static class ShotAssemblyAPI
     {
-
-        /// <summary>
-        /// Test method, generate shot
-        /// </summary>
-        [MenuItem("Assets/GenerateShot")]
-        public static void GenerateShot()
-        {
-            // create the scene with the first one
-            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0010.json", false, "Timelines", false, "ADAM-Ep2-Desert", "Scenes");
-            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0020.json", false, "Timelines");
-            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0030.json", false, "Timelines");
-            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0040.json", false, "Timelines");
-            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0050.json", false, "Timelines");
-            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0060.json", false, "Timelines");
-            GenerateShot("F:/projects/Adam.ShotAssembly/Assets/ADAM-AD1-Desert/ADAM-AD1-0070.json", false, "Timelines");
-        }
-
         /// <summary>
         /// Generate a shot, optionally create a new scene and timeline. Note: if you create a new scene, you MUST create a new timeline as well
         /// </summary>
         /// <param name="fileName">absolute path to the shot assembly config</param>
         /// <param name="useExistingTimeline">should we use an existing timeline or not?</param>
-        /// <param name="timelineName">name of the GameObject that has our PlayableDirector that we want to use (will create a new one if useExistingTimeline is false</param>
+        /// <param name="timelineName">Name of the existing timeline that we should use instead of creating a new one</param>
         /// <param name="timelinePath">if we are creating a new timeline, this is the relative path in the project where we want to save the asset (relative to the project's Assets/ folder)</param>
-        /// <param name="useExistingScene">are we using an existing scene? if not the shot will be generated in the currently open scene</param>
+        /// <param name="createNewScene">are we using an existing scene? if not the shot will be generated in the currently open scene</param>
         /// <param name="sceneName">if we are NOT using an existing scene, what should the scene be called?</param>
         /// <param name="scenePath">if we are NOT using an existing scene, where should the scene be saved?</param>
-        public static void GenerateShot(string fileName, bool useExistingTimeline, string timelinePath, bool useExistingScene, string sceneName, string scenePath)
+        public static void GenerateShot(string fileName, bool useExistingTimeline, string timelinePath, string timelineName, bool createNewScene, string sceneName, string scenePath)
         {
-            if (useExistingScene)
+            if (createNewScene)
             {
                 UnityUtilities.CreateNewScene(sceneName, scenePath);
             }
 
-            GenerateShot(fileName, useExistingScene,timelinePath);
+            GenerateShot(fileName, createNewScene,timelinePath, timelineName);
         }
 
         /// <summary>
@@ -58,7 +41,7 @@ namespace PixelWizards.ShotAssembly
         /// <param name="useExistingTimeline">should we use an existing timeline or not?</param>
         /// <param name="timelineName">name of the GameObject that has our PlayableDirector that we want to use (will create a new one if useExistingTimeline is false</param>
         /// <param name="timelinePath">if we are creating a new timeline, this is the relative path in the project where we want to save the asset (relative to the project's Assets/ folder)</param>
-        public static void GenerateShot(string fileName, bool useExistingTimeline, string timelinePath )
+        public static void GenerateShot(string fileName, bool useExistingTimeline, string timelinePath, string timelineName)
         {
             PlayableDirector pd;
 
@@ -127,19 +110,22 @@ namespace PixelWizards.ShotAssembly
         /// <summary>
         /// Load the specified actor into the scene
         /// </summary>
-        private static GameObject InstanceActorInScene(string prefabName)
+        private static GameObject InstanceActorInScene(Clip clip)
         {
-            var prefabGuid = AssetDatabase.FindAssets(prefabName);
+            var prefabGuid = AssetDatabase.FindAssets(clip.unity_rig);
             if (prefabGuid.Length == 0)
             {
-                Debug.Log("Could not find unity_rig: " + prefabName + " for clip");
+                Debug.Log("Could not find unity_rig: " + clip.unity_rig + " for clip: " + clip.name);
+                return null;
             }
-
-            var prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid[0]);
-            var prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
-            var instance = Object.Instantiate(prefab);
-            instance.name = prefabName; // get rid of the stupid (Clone) at the end of the name
-            return instance;
+            else
+            {
+                var prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid[0]);
+                var prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
+                var instance = Object.Instantiate(prefab);
+                instance.name = clip.unity_rig; // get rid of the stupid (Clone) at the end of the name
+                return instance;
+            }
         }
         
         /// <summary>
@@ -155,16 +141,22 @@ namespace PixelWizards.ShotAssembly
 
             foreach ( var clip in shotInfo.clips)
             {
-                var prefabInstance = InstanceActorInScene(clip.unity_rig);
-                prefabInstance.transform.parent = parentGo.transform;
+                var prefabInstance = InstanceActorInScene(clip);
+                if (prefabInstance == null)
+                    continue;
 
+                prefabInstance.transform.parent = parentGo.transform;
+               
                 var animTrack = timelineAsset.CreateTrack<AnimationTrack>(null, prefabInstance.name);
 
                 // bind the track to our new actor instance
                 pd.SetGenericBinding(animTrack, prefabInstance);
 
                 var anim_clip = FindAnimationClip(clip.name);
-                UnityUtilities.AddClipToAnimationTrack(animTrack, anim_clip);
+                if( anim_clip != null)
+                {
+                    UnityUtilities.AddClipToAnimationTrack(animTrack, anim_clip);
+                }
             }
         }
 
@@ -180,6 +172,9 @@ namespace PixelWizards.ShotAssembly
             var searchPath = "Assets";
 
             var guids = AssetDatabase.FindAssets(clip_name + " t:AnimationClip", new[] { searchPath });
+
+            if (guids.Length < 1)
+                return null;
 
             // should hopefully only find one that we care about
             var animPath = AssetDatabase.GUIDToAssetPath(guids[0]);

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.CodeDom;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -6,6 +7,7 @@ using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using Control = PixelWizards.ShotAssembly.ShotAssemblyController;
 using Loc = PixelWizards.ShotAssembly.ShotAssemblyLoc;                                 // string localization table
+using API = PixelWizards.ShotAssembly.ShotAssemblyAPI;
 
 namespace PixelWizards.ShotAssembly
 {
@@ -57,6 +59,15 @@ namespace PixelWizards.ShotAssembly
         public const string BUTTON_STEP3 = "Step 3: Export .unitypackage";
         public const string TOOLTIP_BUTTONSTEP3 = "Optionally exports the resulting scene as a .unitypackage as part of an animreview / pipeline publish step";
 
+        public const string BUTTON_GENERATORCONFIG = "Path to Config: ";
+        public const string HELP_GENERATORHEADER = "Browse to a shot config.";
+        public const string BUTTON_GENERATESHOT = "Generate Shot";
+
+        public const string LABEL_SCENENAME = "Scene Name";
+        public const string LABEL_SCENEPATH = "Scene Path:";
+        public const string LABEL_CREATENEWTIMELINE = "Create new Timeline";
+        public const string HELP_NEWSCENEYOUMUSTCREATENEWTIMELINE = "If you are creating a new scene, you MUST create a new Timeline as well";
+
     }
 
     /// <summary>
@@ -75,10 +86,19 @@ namespace PixelWizards.ShotAssembly
             public bool animState = true;
         }
 
+        private enum TABBAR
+        {
+            TAB_WIZARD =0,
+            TAB_GENERATOR =1,
+        }
+
         private static WizardState state = new WizardState();
 
         private static Vector2 minWindowSize = new Vector2(250, 300);
         private static Vector2 scrollPosition = Vector2.zero;
+        private string[] tabbar = { "Wizard", "Load Config" };
+        private int activeTab = 0;
+        private float leftColumnWidth = 100f;
 
         [MenuItem(Loc.MENUITEMPATH)]
         private static void ShowWindow()
@@ -110,29 +130,137 @@ namespace PixelWizards.ShotAssembly
 
                 GUILayout.Space(10f);
 
-                state.timelinestate = EditorGUILayout.Foldout(state.timelinestate, Loc.FOLDOUT_TIMELINE);
-                if( state.timelinestate)
+                DoTopTabs();
+                GUILayout.Space(10f);
+
+                switch ( activeTab)
                 {
-                    DoTimelineUI();
-                    GUILayout.Space(10f);
+                    case (int)TABBAR.TAB_WIZARD:
+                        {
+                            state.timelinestate = EditorGUILayout.Foldout(state.timelinestate, Loc.FOLDOUT_TIMELINE);
+                            if (state.timelinestate)
+                            {
+                                DoTimelineUI();
+                                GUILayout.Space(10f);
+                            }
+                            state.actorState = EditorGUILayout.Foldout(state.actorState, Loc.FOLDOUT_ACTOR);
+                            if (state.actorState)
+                            {
+                                DoActorUI();
+                                GUILayout.Space(10f);
+                            }
+                            state.animState = EditorGUILayout.Foldout(state.animState, Loc.FOLDOUT_ANIM);
+                            if (state.animState)
+                            {
+                                DoAnimUI();
+                                GUILayout.Space(10f);
+                            }
+                            DoProcessUI();
+                            break;
+                        }
+                    case (int)TABBAR.TAB_GENERATOR:
+                        {
+                            DoGeneratorUI();
+                            break;
+                        }
                 }
-                state.actorState = EditorGUILayout.Foldout(state.actorState, Loc.FOLDOUT_ACTOR);
-                if (state.actorState)
-                {
-                    DoActorUI();
-                    GUILayout.Space(10f);
-                }
-                state.animState = EditorGUILayout.Foldout(state.animState, Loc.FOLDOUT_ANIM);
-                if (state.animState)
-                {
-                    DoAnimUI();
-                    GUILayout.Space(10f);
-                }
-                DoProcessUI();
             }
           //  GUILayout.EndVertical();
         }
-        
+
+        private void DoTopTabs()
+        {
+            activeTab = GUILayout.Toolbar(activeTab, tabbar, GUILayout.Height(35f));
+        }
+
+        private void DoGeneratorUI()
+        {
+            // pick shot config
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            {
+                GUILayout.Space(5f);
+                GUILayout.BeginVertical();
+                {
+                    GUILayout.Label(Loc.HELP_GENERATORHEADER, EditorStyles.helpBox);
+                    GUILayout.Space(5f);
+
+                    // browse for the config
+                    RenderFileBrowserField(Loc.BUTTON_GENERATORCONFIG, ref Control.shotGen.generatorConfig, "Assets");
+                    GUILayout.Space(5f);
+                }
+                GUILayout.Space(5f);
+                GUILayout.EndVertical();
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5f);
+
+            // configure the scene
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            {
+                GUILayout.Space(5f);
+                GUILayout.BeginVertical();
+                {
+                    Control.shotGen.createNewScene = GUILayout.Toggle(Control.shotGen.createNewScene, Loc.TOGGLE_CREATENEWSCENE);
+                    GUILayout.Space(5f);
+
+                    GUILayout.Label(Loc.TOOLTIP_CREATENEWSCENE, EditorStyles.helpBox);
+                    GUILayout.Space(5f);
+
+                    RenderTextField(Loc.LABEL_SCENENAME, ref Control.shotGen.timelineName);
+                    GUILayout.Space(5f);
+
+                    RenderPathBrowserField(Loc.LABEL_SCENEPATH, ref Control.shotGen.scenePath, "Assets");
+                    GUILayout.Space(5f);
+                }
+                GUILayout.Space(5f);
+                GUILayout.EndVertical();
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5f);
+
+            // configure the timeline
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            {
+                GUILayout.Space(5f);
+                GUILayout.BeginVertical();
+                {
+                    if (Control.shotGen.createNewScene)
+                    {
+                        GUILayout.Label(Loc.LABEL_CREATENEWTIMELINE, EditorStyles.boldLabel);
+                        GUILayout.Space(5f);
+                        GUILayout.Label(Loc.HELP_NEWSCENEYOUMUSTCREATENEWTIMELINE, EditorStyles.helpBox);
+                        GUILayout.Space(5f);
+                        Control.shotGen.useExistingTimeline = false;
+                    }
+                    else
+                    {
+                        // timeline path
+                        Control.shotGen.useExistingTimeline = GUILayout.Toggle(Control.shotGen.useExistingTimeline, Loc.TOGGLE_EXISTINGTIMELINE);
+                        GUILayout.Space(5f);
+
+                        GUILayout.Label(Loc.TOOLTIP_EXISTINGTIMELINE, EditorStyles.helpBox);
+                        GUILayout.Space(5f);
+                    }
+
+                    RenderTextField(Loc.LABEL_TIMELINENAME, ref Control.shotGen.timelineName);
+                    GUILayout.Space(5f);
+
+                    RenderPathBrowserField(Loc.LABEL_TIMELINEPATH, ref Control.shotGen.timelinePath, "Assets");
+                    GUILayout.Space(5f);
+                }
+                GUILayout.Space(5f);
+                GUILayout.EndVertical();
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5f);
+
+            // and generate the thing
+            if ( GUILayout.Button(Loc.BUTTON_GENERATESHOT, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
+            {
+                API.GenerateShot(Control.shotGen.generatorConfig, Control.shotGen.useExistingTimeline, Control.shotGen.timelineName, Control.shotGen.timelinePath, Control.shotGen.createNewScene, Control.shotGen.sceneName, Control.shotGen.scenePath);
+            }
+        }
+
         /// <summary>
         /// Renders the Timeline section of the UI
         /// </summary>
@@ -387,6 +515,48 @@ namespace PixelWizards.ShotAssembly
                 }
             }
             GUILayout.BeginVertical();
+        }
+
+
+        private void RenderFileBrowserField(string loc, ref string field, string startingPath)
+        {
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label(loc, GUILayout.Width(leftColumnWidth));
+                field = GUILayout.TextField(field, GUILayout.MaxWidth(position.width - 145f));
+                if (GUILayout.Button("...", GUILayout.Width(35f)))
+                {
+                    field = EditorUtility.OpenFilePanel("Browse for Config", startingPath, "");
+                }
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(2f);
+        }
+
+        private void RenderTextField(string loc, ref string field)
+        {
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label(loc, GUILayout.Width(leftColumnWidth));
+                field = GUILayout.TextField(field, GUILayout.ExpandWidth(true));
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(2f);
+        }
+
+        private void RenderPathBrowserField(string loc, ref string field, string startingPath)
+        {
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Label(loc, GUILayout.Width(leftColumnWidth));
+                field = GUILayout.TextField(field, GUILayout.MaxWidth(position.width - 145f));
+                if (GUILayout.Button("...", GUILayout.Width(35f)))
+                {
+                    field = EditorUtility.OpenFolderPanel("Browse for Path", startingPath, "");
+                }
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(2f);
         }
     }
 }

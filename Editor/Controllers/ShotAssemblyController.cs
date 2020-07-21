@@ -33,9 +33,22 @@ namespace PixelWizards.ShotAssembly
         public List<AnimationClip> animationList = new List<AnimationClip>();
     }
 
+    public class ShotGeneratorModel
+    {
+        public string generatorConfig = default;
+        public bool useExistingTimeline = false;
+        public string timelineName = default;
+        public string timelinePath = "Timelines";
+        public bool createNewScene = false;
+        public string sceneName = default;
+        public string scenePath = "Scenes";
+
+    }
+
     public class ShotAssemblyController
     {
         public static ShotAssemblyModel model = new ShotAssemblyModel();
+        public static ShotGeneratorModel shotGen = new ShotGeneratorModel();
 
         /// <summary>
         /// Initializes the data model when the window is opened
@@ -43,6 +56,7 @@ namespace PixelWizards.ShotAssembly
         public static void Init()
         {
             model = new ShotAssemblyModel();
+            shotGen = new ShotGeneratorModel();
         }
 
         /// <summary>
