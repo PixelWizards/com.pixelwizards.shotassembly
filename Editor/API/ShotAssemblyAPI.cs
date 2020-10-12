@@ -31,7 +31,7 @@ namespace PixelWizards.ShotAssembly
                 UnityUtilities.CreateNewScene(sceneName, scenePath);
             }
 
-            GenerateShot(fileName, createNewScene,timelinePath, timelineName);
+            GenerateShot(fileName, createNewScene, timelinePath, timelineName);
         }
 
         /// <summary>
@@ -52,6 +52,11 @@ namespace PixelWizards.ShotAssembly
                 var shotInfo = GetShotInfo(fileName);
                 // create our timeline / playable director
                 pd = GetOrAddPlayableDirector(shotInfo.shot_name, timelinePath, useExistingTimeline);
+                if( pd == null)
+                {
+                    Debug.LogError("Unable to create playable director?");
+                    return;
+                }
                 // instance the actors and create their tracks
                 GenerateTimelineTracks(shotInfo, pd);
             }
@@ -97,6 +102,10 @@ namespace PixelWizards.ShotAssembly
                     {
                         Debug.Log("Could not find PlayableDirector for Timeline : " + timelineName);
                     }
+                }
+                else
+                {
+                    Debug.Log("Unable to find Timeline GameObject in scene: " + timelineName);
                 }
             }
             else

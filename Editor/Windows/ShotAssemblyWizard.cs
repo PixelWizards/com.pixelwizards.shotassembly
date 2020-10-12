@@ -206,7 +206,7 @@ namespace PixelWizards.ShotAssembly
                     GUILayout.Label(Loc.TOOLTIP_CREATENEWSCENE, EditorStyles.helpBox);
                     GUILayout.Space(5f);
 
-                    RenderTextField(Loc.LABEL_SCENENAME, ref Control.shotGen.timelineName);
+                    RenderTextField(Loc.LABEL_SCENENAME, ref Control.shotGen.sceneName);
                     GUILayout.Space(5f);
 
                     RenderPathBrowserField(Loc.LABEL_SCENEPATH, ref Control.shotGen.scenePath, "Assets");
@@ -257,7 +257,7 @@ namespace PixelWizards.ShotAssembly
             // and generate the thing
             if ( GUILayout.Button(Loc.BUTTON_GENERATESHOT, GUILayout.ExpandWidth(true), GUILayout.Height(35f)))
             {
-                API.GenerateShot(Control.shotGen.generatorConfig, Control.shotGen.useExistingTimeline, Control.shotGen.timelineName, Control.shotGen.timelinePath, Control.shotGen.createNewScene, Control.shotGen.sceneName, Control.shotGen.scenePath);
+                API.GenerateShot(Control.shotGen.generatorConfig, Control.shotGen.useExistingTimeline, Control.shotGen.timelinePath, Control.shotGen.timelineName, Control.shotGen.createNewScene, Control.shotGen.sceneName, Control.shotGen.scenePath);
             }
         }
 
