@@ -94,8 +94,12 @@ namespace PixelWizards.ShotAssembly
 
         private static WizardState state = new WizardState();
 
+        private static ShotAssemblyWizard thisWindow;
         private static Vector2 minWindowSize = new Vector2(250, 300);
         private static Vector2 scrollPosition = Vector2.zero;
+        private static Vector2 windowScroll = Vector2.zero;
+        private static Vector2 windowSize = Vector2.zero;
+
         private string[] tabbar = { "Wizard", "Load Config" };
         private int activeTab = 0;
         private float leftColumnWidth = 100f;
@@ -103,7 +107,7 @@ namespace PixelWizards.ShotAssembly
         [MenuItem(Loc.MENUITEMPATH)]
         private static void ShowWindow()
         {
-            var thisWindow = GetWindow<ShotAssemblyWizard>(false, Loc.WINDOWTITLE, true);
+            thisWindow = GetWindow<ShotAssemblyWizard>(false, Loc.WINDOWTITLE, true);
             thisWindow.minSize = minWindowSize;
             thisWindow.Reset();
         }
@@ -120,19 +124,26 @@ namespace PixelWizards.ShotAssembly
 
         private void OnGUI()
         {
-            GUILayout.Space(10f);
-           // GUILayout.BeginVertical();
+            if(thisWindow == null)
             {
-                GUILayout.Space(5f);
-                GUILayout.Label(Loc.WINDOW_HEADER, EditorStyles.boldLabel);
-                GUILayout.Space(5f);
-                GUILayout.Label(Loc.HELP_HEADER, EditorStyles.helpBox);
+                thisWindow = GetWindow<ShotAssemblyWizard>(false, Loc.WINDOWTITLE, true);
+            }
+            windowSize = thisWindow.position.size;
 
-                GUILayout.Space(10f);
+            GUILayout.Space(10f);
+            
+            GUILayout.Space(5f);
+            GUILayout.Label(Loc.WINDOW_HEADER, EditorStyles.boldLabel);
+            GUILayout.Space(5f);
+            GUILayout.Label(Loc.HELP_HEADER, EditorStyles.helpBox);
 
-                DoTopTabs();
-                GUILayout.Space(10f);
+            GUILayout.Space(10f);
 
+            DoTopTabs();
+            GUILayout.Space(10f);
+
+            windowScroll = GUILayout.BeginScrollView(windowScroll, GUILayout.ExpandWidth(true), GUILayout.Height(windowSize.y - 125f));
+            {
                 switch ( activeTab)
                 {
                     case (int)TABBAR.TAB_WIZARD:
@@ -165,7 +176,7 @@ namespace PixelWizards.ShotAssembly
                         }
                 }
             }
-          //  GUILayout.EndVertical();
+            GUILayout.EndScrollView();
         }
 
         private void DoTopTabs()
@@ -188,8 +199,8 @@ namespace PixelWizards.ShotAssembly
                     RenderFileBrowserField(Loc.BUTTON_GENERATORCONFIG, ref Control.shotGen.generatorConfig, "Assets");
                     GUILayout.Space(5f);
                 }
-                GUILayout.Space(5f);
                 GUILayout.EndVertical();
+                GUILayout.Space(5f);
             }
             GUILayout.EndHorizontal();
             GUILayout.Space(5f);
@@ -248,8 +259,8 @@ namespace PixelWizards.ShotAssembly
                     RenderPathBrowserField(Loc.LABEL_TIMELINEPATH, ref Control.shotGen.timelinePath, "Assets");
                     GUILayout.Space(5f);
                 }
-                GUILayout.Space(5f);
                 GUILayout.EndVertical();
+                GUILayout.Space(5f);
             }
             GUILayout.EndHorizontal();
             GUILayout.Space(5f);
@@ -419,6 +430,7 @@ namespace PixelWizards.ShotAssembly
                         }
                         GUILayout.EndHorizontal();
                         GUILayout.Space(5f);
+
                         GUILayout.BeginHorizontal();
                         {
                             var content = new GUIContent
@@ -431,6 +443,7 @@ namespace PixelWizards.ShotAssembly
                         }
                         GUILayout.EndHorizontal();
                         GUILayout.Space(5f);
+
                         GUILayout.BeginHorizontal();
                         {
                             var content = new GUIContent
@@ -514,7 +527,7 @@ namespace PixelWizards.ShotAssembly
                     Control.Export();
                 }
             }
-            GUILayout.BeginVertical();
+            GUILayout.EndVertical();
         }
 
 
